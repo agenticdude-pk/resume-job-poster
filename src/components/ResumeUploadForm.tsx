@@ -37,16 +37,29 @@ const ResumeUploadForm = () => {
       // Add each resume file with a unique name
       selectedFiles.forEach((file, index) => {
         formData.append(`resume_${index + 1}`, file);
+        console.log(`Added resume_${index + 1}:`, file.name, `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
       });
       
       formData.append('jobTitle', jobTitle);
       formData.append('jobDescription', jobDescription);
       formData.append('resumeCount', selectedFiles.length.toString());
 
+      console.log('Sending to webhook:', {
+        url: webhookUrl,
+        jobTitle,
+        jobDescription,
+        resumeCount: selectedFiles.length,
+        files: selectedFiles.map(f => f.name)
+      });
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
       });
+
+      console.log('Webhook response status:', response.status);
+      const responseText = await response.text();
+      console.log('Webhook response:', responseText);
 
       if (response.ok) {
         toast({
