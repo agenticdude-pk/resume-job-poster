@@ -11,7 +11,7 @@ import { Loader2, Send, Briefcase } from 'lucide-react';
 const ResumeUploadForm = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -20,10 +20,10 @@ const ResumeUploadForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile || !jobTitle.trim() || !jobDescription.trim()) {
+    if (selectedFiles.length === 0 || !jobTitle.trim() || !jobDescription.trim()) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all fields and upload a resume.",
+        description: "Please fill in all fields and upload at least one resume.",
         variant: "destructive",
       });
       return;
@@ -33,9 +33,15 @@ const ResumeUploadForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append('resume', selectedFile);
+      
+      // Add each resume file with a unique name
+      selectedFiles.forEach((file, index) => {
+        formData.append(`resume_${index + 1}`, file);
+      });
+      
       formData.append('jobTitle', jobTitle);
       formData.append('jobDescription', jobDescription);
+      formData.append('resumeCount', selectedFiles.length.toString());
 
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -51,7 +57,7 @@ const ResumeUploadForm = () => {
         // Reset form
         setJobTitle('');
         setJobDescription('');
-        setSelectedFile(null);
+        setSelectedFiles([]);
       } else {
         throw new Error('Failed to submit application');
       }
@@ -117,8 +123,8 @@ const ResumeUploadForm = () => {
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Resume Upload</Label>
                 <FileUpload 
-                  onFileSelect={setSelectedFile}
-                  selectedFile={selectedFile}
+                  onFileSelect={setSelectedFiles}
+                  selectedFiles={selectedFiles}
                 />
               </div>
 
