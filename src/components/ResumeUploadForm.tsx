@@ -58,13 +58,14 @@ const ResumeUploadForm = () => {
       });
 
       console.log('Webhook response status:', response.status);
-      const responseText = await response.text();
-      console.log('Webhook response:', responseText);
-
+      
       if (response.ok) {
+        const responseText = await response.text();
+        console.log('Webhook success response:', responseText);
+        
         toast({
           title: "Success!",
-          description: "Your application has been submitted successfully.",
+          description: `Successfully submitted ${selectedFiles.length} resume(s) for "${jobTitle}".`,
         });
         
         // Reset form
@@ -72,12 +73,24 @@ const ResumeUploadForm = () => {
         setJobDescription('');
         setSelectedFiles([]);
       } else {
-        throw new Error('Failed to submit application');
+        const errorText = await response.text();
+        console.error('Webhook error response:', errorText);
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
       }
     } catch (error) {
+      console.error('Submission error:', error);
+      
+      let errorMessage = "There was an error submitting your application. Please try again.";
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "Network error: Please check your connection and try again.";
+      } else if (error instanceof Error) {
+        errorMessage = `Submission failed: ${error.message}`;
+      }
+      
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your application. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
