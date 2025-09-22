@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 const jobTitles = [
@@ -85,18 +85,12 @@ const JobPostForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="job-title">Job Title</Label>
-            <Select value={selectedJobTitle} onValueChange={setSelectedJobTitle}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a job title" />
-              </SelectTrigger>
-              <SelectContent>
-                {jobTitles.map((title) => (
-                  <SelectItem key={title} value={title}>
-                    {title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="job-title"
+              placeholder="Enter job title"
+              value={selectedJobTitle}
+              onChange={(e) => setSelectedJobTitle(e.target.value)}
+            />
           </div>
 
           {selectedJobTitle && (
