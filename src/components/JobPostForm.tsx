@@ -22,16 +22,28 @@ const jobTitles = [
 const JobPostForm = () => {
   const [selectedJobTitle, setSelectedJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedJobTitle || !jobDescription.trim()) {
+    if (!selectedJobTitle || !jobDescription.trim() || !email.trim()) {
       toast({
         title: "Error",
-        description: "Please select a job title and provide a description.",
+        description: "Please fill in all fields including your email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
@@ -48,6 +60,7 @@ const JobPostForm = () => {
         body: JSON.stringify({
           jobTitle: selectedJobTitle,
           jobDescription: jobDescription,
+          email: email,
         }),
       });
 
@@ -58,6 +71,7 @@ const JobPostForm = () => {
         });
         setSelectedJobTitle("");
         setJobDescription("");
+        setEmail("");
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -94,21 +108,34 @@ const JobPostForm = () => {
           </div>
 
           {selectedJobTitle && (
-            <div className="space-y-2">
-              <Label htmlFor="job-description">Job Description</Label>
-              <Textarea
-                id="job-description"
-                placeholder="Enter detailed job description, requirements, responsibilities..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="min-h-[120px]"
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email to receive results"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="job-description">Job Description</Label>
+                <Textarea
+                  id="job-description"
+                  placeholder="Enter detailed job description, requirements, responsibilities..."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  className="min-h-[120px]"
+                />
+              </div>
+            </>
           )}
 
           <Button 
             type="submit" 
-            disabled={isSubmitting || !selectedJobTitle || !jobDescription.trim()}
+            disabled={isSubmitting || !selectedJobTitle || !jobDescription.trim() || !email.trim()}
             className="w-full"
           >
             {isSubmitting ? "Submitting..." : "Post Job"}
